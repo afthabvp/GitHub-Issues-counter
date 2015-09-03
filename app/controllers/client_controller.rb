@@ -7,8 +7,7 @@ class ClientController < ApplicationController
   	input= params[:client] [:content]
   	gist=input.split("com/").last
   	uri=URI.parse("https://api.github.com/repos/"+gist+"")
-
-  	uri.query=URI.encode_www_form(accees_token:'') 
+ 
   	time = Time.now
   	yest=(time - 1.day).to_time.iso8601
   	week=(time - 7.day).to_time.iso8601
@@ -54,11 +53,11 @@ def find_issues(uri,time_since,page,per_page)
 
 	request = Net::HTTP::Get.new(uri.path)
 	if not time_since.nil? || time_since.empty?
-		params = {'since' =>time_since,'state'=>'open','page'=>page,'per_page'=>per_page,'access_token'=>'f0e17141e0a5e24cd858ea7cfb355c9fd2f55ea6'}
+		params = {'since' =>time_since,'state'=>'open','page'=>page,'per_page'=>per_page}#,'access_token'=>'e97095172e81c4bce99a1b11cd2518810d83fb8b'}
 		request.set_form_data( params )
 		request = Net::HTTP::Get.new( uri.path+ '?' + request.body ) 
 	else
-		params = {'state'=>'open','page'=>page,'per_page'=>per_page,'access_token'=>'f0e17141e0a5e24cd858ea7cfb355c9fd2f55ea6'}
+		params = {'state'=>'open','page'=>page,'per_page'=>per_page}#,'access_token'=>'e97095172e81c4bce99a1b11cd2518810d83fb8b'}
 		request.set_form_data( params )
 		request = Net::HTTP::Get.new( uri.path+ '?' + request.body ) 
 	end
