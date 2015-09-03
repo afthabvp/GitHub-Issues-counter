@@ -1,0 +1,66 @@
+
+
+class ClientController < ApplicationController
+  def index
+  end
+  def submit
+  	input= params[:client] [:content]
+  	time = Time.now
+  	yest=(time - 1.day).to_time.iso8601
+  	week=(time - 7.day).to_time.iso8601
+
+
+	@timenow=  time.to_time.iso8601
+
+	day1 = find_issues(input,yest)
+	@last_24=day1
+	day6= find_issues(input,week)
+	@day8=day6
+	@bw7and1=day6-day1
+
+	@total = find_issues(input,"")
+
+  end
+
+  def find_issues(input,time_since)
+  	$count=0
+  	$i = 1
+  	$j=1
+  	while $i !=0 do
+
+  	gist=input.split("com/").last
+  	uri=URI.parse("https://api.github.com/repos/"+gist+"")
+  	http = Net::HTTP.new(uri.host, uri.port)
+	http.use_ssl = true
+	http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+	request = Net::HTTP::Get.new(uri.path)
+	if not time_since.nil? || time_since.empty?
+		params = {'since' =>time_since,'state'=>'open','page'=>$j}
+		request.set_form_data( params )
+		request = Net::HTTP::Get.new( uri.path+ '?' + request.body ) 
+	else
+		params = {'state'=>'open','page'=>$j}
+		request.set_form_data( params )
+		request = Net::HTTP::Get.new( uri.path+ '?' + request.body ) 
+	end
+
+	
+	response= http.request(request)
+	$i= respond_parse(response)
+	$count= $count+$i
+	
+	end
+	return $count
+  end
+ def respond_parse(response)
+ 	res1=JSON.parse(response.body)
+ 	if not  res1.nil? 
+ 		state = res1[0]['state']
+ 		if state == 'open'
+ 			return res1.count
+ 		end
+ 	end
+ 	return 0
+ end
+end
